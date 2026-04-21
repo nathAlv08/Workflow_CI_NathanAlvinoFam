@@ -6,7 +6,7 @@ import mlflow
 
 def main():
     print("Memuat dataset untuk Workflow CI...")
-    data_path = "dataset_preprocessing/credit_risk_clean.csv"
+    data_path = "credit_risk_clean.csv"
     
     if not os.path.exists(data_path):
         print(f"Error: Data tidak ditemukan di {data_path}")
