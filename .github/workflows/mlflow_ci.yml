@@ -1,0 +1,69 @@
+name: MLflow CI Pipeline
+
+on:
+  push:
+    paths:
+      - 'MLProject/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.7'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mlflow==2.19.0 pandas scikit-learn
+
+      - name: Run MLflow Project
+        run: |
+          # Berpindah ke folder MLProject dan menjalankan training
+          cd MLProject
+          mlflow run . --env-manager=local
+
+      - name: Get latest MLflow run_id
+        id: get_run_id
+        run: |
+          # Mengambil Run ID yang baru saja digenerate oleh script modelling.py
+          cd MLProject
+          RUN_ID=$(cat run_id.txt)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "Model Run ID: $RUN_ID"
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Model
+        run: |
+          IMAGE_NAME="nathanalv/credit-scoring-model:latest"
+          
+          # Build docker image
+          mlflow models build-docker -m "MLProject/mlruns/0/${{ env.RUN_ID }}/artifacts/model" -n $IMAGE_NAME
+          
+          # Push image ke Docker Hub
+          docker push $IMAGE_NAME
+
+      - name: Commit artifacts to GitHub
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add MLProject/mlruns/
+          git commit -m "Add MLflow training artifacts" || echo "No changes to commit"
+          git push origin main
