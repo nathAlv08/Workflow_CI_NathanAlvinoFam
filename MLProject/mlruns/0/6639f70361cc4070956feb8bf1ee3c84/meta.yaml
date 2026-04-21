@@ -1,0 +1,15 @@
+artifact_uri: file:///home/runner/work/Workflow_CI_NathanAlvinoFam/Workflow_CI_NathanAlvinoFam/MLProject/mlruns/0/6639f70361cc4070956feb8bf1ee3c84/artifacts
+end_time: 1776781827303
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 6639f70361cc4070956feb8bf1ee3c84
+run_name: polite-pig-580
+run_uuid: 6639f70361cc4070956feb8bf1ee3c84
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1776781811901
+status: 3
+tags: []
+user_id: runner
