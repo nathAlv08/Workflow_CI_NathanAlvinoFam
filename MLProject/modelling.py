@@ -5,13 +5,14 @@ from sklearn.ensemble import RandomForestClassifier
 import mlflow
 
 def main():
-    # Mengarahkan penyimpanan ke folder lokal (agar bisa ditangkap oleh GitHub Actions)
-    mlflow.set_tracking_uri("file://" + os.path.abspath("mlruns"))
-    mlflow.set_experiment("Automated_CI_Training")
-
     print("Memuat dataset untuk Workflow CI...")
     # Path relatif terhadap file modelling.py
-    data_path = "credit_risk_clean.csv"
+    data_path = "dataset_preprocessing/credit_risk_clean.csv"
+    
+    if not os.path.exists(data_path):
+        print(f"Error: Data tidak ditemukan di {data_path}")
+        return
+
     df = pd.read_csv(data_path)
 
     X = df.drop('loan_status', axis=1)
@@ -20,6 +21,7 @@ def main():
 
     mlflow.sklearn.autolog()
 
+    # mlflow.start_run() akan otomatis nyambung ke "Bos" (mlflow run)
     with mlflow.start_run() as run:
         print("Melatih model di environment MLflow Project...")
         rf = RandomForestClassifier(n_estimators=100, random_state=42)
