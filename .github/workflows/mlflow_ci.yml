@@ -50,8 +50,7 @@ jobs:
 
       - name: Build and Push Docker Model
         run: |
-          # UBAH 'nathalvino' DENGAN USERNAME DOCKER HUB KAMU!
-          IMAGE_NAME="nathalvino/credit-scoring-model:latest"
+          IMAGE_NAME="nathanalv/credit-scoring-model:latest"
           
           mlflow models build-docker -m "MLProject/mlruns/0/${{ env.RUN_ID }}/artifacts/model" -n $IMAGE_NAME
           docker push $IMAGE_NAME
