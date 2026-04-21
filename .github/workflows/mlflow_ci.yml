@@ -31,16 +31,14 @@ jobs:
 
       - name: Run MLflow Project
         run: |
-          # Berpindah ke folder MLProject dan menjalankan training
           cd MLProject
           mlflow run . --env-manager=local
 
       - name: Get latest MLflow run_id
         id: get_run_id
         run: |
-          # Mengambil Run ID yang baru saja digenerate oleh script modelling.py
           cd MLProject
-          RUN_ID=$(cat run_id.txt)
+          RUN_ID=$(ls -t mlruns/0 | grep -v 'meta.yaml' | head -n 1)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Model Run ID: $RUN_ID"
 
@@ -52,12 +50,10 @@ jobs:
 
       - name: Build and Push Docker Model
         run: |
-          IMAGE_NAME="nathanalv/credit-scoring-model:latest"
+          # UBAH 'nathalvino' DENGAN USERNAME DOCKER HUB KAMU!
+          IMAGE_NAME="nathalvino/credit-scoring-model:latest"
           
-          # Build docker image
           mlflow models build-docker -m "MLProject/mlruns/0/${{ env.RUN_ID }}/artifacts/model" -n $IMAGE_NAME
-          
-          # Push image ke Docker Hub
           docker push $IMAGE_NAME
 
       - name: Commit artifacts to GitHub
@@ -66,4 +62,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add MLProject/mlruns/
           git commit -m "Add MLflow training artifacts" || echo "No changes to commit"
+          git pull --rebase origin main
           git push origin main
